@@ -1,16 +1,9 @@
-const response = (statusCode, data, message, res) => {
+const response = (statusCode, data, message, res, paginationInfo) => {
   res.json({
     status: statusCode,
     message: message,
-    data: data,
-    pagination: {
-      prev: {
-        id: "",
-      },
-      next: {
-        id: "",
-      },
-    },
+    datas: data,
+    paginationInfo,
   });
 };
 
