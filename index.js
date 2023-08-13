@@ -5,6 +5,15 @@ const db = require("./connection");
 const response = require("./response");
 const NotFound = require("./notfound");
 
+
+app.use((req, res, next)=> {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  next();
+})
+
 app.get("/", (req, res) => {
   res.send("Selamat datang di API ahmadzidni.site");
 });
