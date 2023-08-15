@@ -14,6 +14,36 @@ app.use((req, res, next)=> {
   next();
 })
 
+
+
+app.get("/api/doaharian",(req, res)=>{
+  const doasql = "SELECT * FROM doaharian"
+  db.query(doasql, (error, results) =>{
+    response(200, results, "data berhasil di ambil", res);
+  })
+})
+
+app.get("/api/doaharian/:id", (req, res) => {
+  const inputId = parseInt(req.params.id); // Mengubah ID dari string ke integer
+  if (isNaN(inputId)) {
+    return response(400, null, "Invalid ID format/ID harus Berupa ANGKA!!!", res);
+  }
+  
+  const filterdoasql = `SELECT * FROM doaharian WHERE id = ${inputId};`;
+  db.query(filterdoasql, (error, result) => {
+    if (error) {
+      return response(500, null, "Internal server error", res);
+    }
+    
+    if (result.length === 0) {
+      return response(404, null, "Data not found", res);
+    }
+    
+    response(200, result, "Data ditemukan", res);
+  });
+});
+
+
 app.get("/", (req, res) => {
   res.send("Selamat datang di API ahmadzidni.site");
 });
@@ -67,6 +97,10 @@ app.get("/api/asmaulhusna/:id", (req, res) => {
       });
     });
   });
+});
+
+app.use((req, res) => {
+  return response(404, null, "Endpoint not found", res);
 });
 
 app.listen(port, () => {
