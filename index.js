@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const port = 3000;
 const db = require("./connection");
+const path = require('path')
 const response = require("./response");
 const NotFound = require("./notfound");
 
@@ -51,12 +52,13 @@ const checkApiKey = (req, res, next) => {
   }
 };
 
-app.use(express.static('public'))
+// Menyediakan direktori publik
+app.use(express.static('public'));
 
 app.get("/", (req, res) => {
-  res.sendFile('index.html');
+  const filePath = path.join(__dirname, 'public', 'index.html');
+  res.sendFile(filePath);
 });
-
 
 app.use(checkApiKey);
 
