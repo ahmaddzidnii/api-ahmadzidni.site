@@ -6,6 +6,10 @@ const response = require("./response");
 const NotFound = require("./notfound");
 
 
+
+
+// CORS
+
 app.use((req, res, next)=> {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
@@ -14,11 +18,113 @@ app.use((req, res, next)=> {
   next();
 })
 
+// AKHIR CORS
 
+
+const apiKeys = {
+  'ahmadd': { limit: 1000000 }, // Batasan khusus untuk API key 'ahmad'
+  'madzz': { limit: Infinity } // Tidak ada batasan untuk API key kedua
+};
+
+const usageTracker = {}; // Objek untuk melacak penggunaan API key
+
+// Middleware untuk memeriksa API key dan batasan
+const checkApiKey = (req, res, next) => {
+  const providedApiKey = req.query.ApiKey;
+
+  const apiKeyData = apiKeys[providedApiKey];
+
+  if (apiKeyData) {
+    if (!usageTracker[providedApiKey]) {
+      usageTracker[providedApiKey] = 1;
+    } else {
+      usageTracker[providedApiKey]++;
+    }
+
+    if (usageTracker[providedApiKey] > apiKeyData.limit) {
+      res.status(429).json({ error: 'API key usage limit exceeded' });
+    } else {
+      next();
+    }
+  } else {
+    res.status(401).json({ error: 'Invalid API key' });
+  }
+};
+
+app.use(express.static('public'))
+
+app.get("/", (req, res) => {
+  res.sendFile('index.html');
+});
+
+
+app.use(checkApiKey);
+
+// Middleware Logging 
+
+app.use((req, res, next) => {
+  const now = new Date();
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  const seconds = now.getSeconds();
+
+  function formatNumber(date) {
+    if (date < 10) {
+      return `0${date}`;
+    } else {
+      return date;
+    }
+  }
+
+  console.log(`terjadi permintaan pada server pada jam ${formatNumber(hours)}:${formatNumber(minutes)}:${formatNumber(seconds)}`);
+
+
+  next();
+})
+
+//Akhir Middleware
+
+
+
+app.get("/api/kisahnabi", (req, res) =>{
+  const sqlKisahNabi = "SELECT * FROM kisahnabi"
+  db.query(sqlKisahNabi, (error, results) =>{
+    if (error){
+      return response(500, null, "Internal Server Error", res)
+    }
+    response(200, results, "data berhasil diambil", res)
+  })
+})
+
+app.get("/api/kisahnabi/:id", (req, res) => {
+  const inputId = parseInt(req.params.id); // Mengubah ID dari string ke integer
+  if (isNaN(inputId)) {
+    return response(400, null, "Invalid ID format/ID harus Berupa ANGKA!!!", res);
+  }
+  
+  const filterKisahNabiSql = `SELECT * FROM kisahnabi WHERE id = ${inputId};`;
+  db.query(filterKisahNabiSql, (error, result) => {
+    if (error) {
+      return response(500, null, "Internal server error", res);
+    }
+    
+    else if (result.length === 0) {
+      return response(404, null, "Data not found", res);
+    }
+    
+    else{
+      response(200, result, "Data berhasil ditemukan", res);
+    }
+    
+  });
+});
 
 app.get("/api/doaharian",(req, res)=>{
   const doasql = "SELECT * FROM doaharian"
   db.query(doasql, (error, results) =>{
+    if (error) {
+      return response(500, null, "Internal Server Error", res)
+    }
     response(200, results, "data berhasil di ambil", res);
   })
 })
@@ -35,18 +141,19 @@ app.get("/api/doaharian/:id", (req, res) => {
       return response(500, null, "Internal server error", res);
     }
     
-    if (result.length === 0) {
+    else if (result.length === 0) {
       return response(404, null, "Data not found", res);
     }
     
-    response(200, result, "Data ditemukan", res);
+    else{
+      response(200, result, "Data berhasil ditemukan", res);
+    }
+    
   });
 });
 
 
-app.get("/", (req, res) => {
-  res.send("Selamat datang di API ahmadzidni.site");
-});
+
 
 app.get("/api/asmaulhusna", (req, res) => {
   db.query("SELECT * FROM `asmaul-husna`", (error, results) => {
