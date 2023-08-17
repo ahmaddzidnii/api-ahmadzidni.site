@@ -9,48 +9,18 @@ const NotFound = require("./notfound");
 
 
 
+// Middleware
+const Logging = require('./middleware/loging');
+const checkApiKey = require('./middleware/apiKey')
+const cors = require('./middleware/cors')
+const kirimPesan = require('./middleware/kirimpesan')
+
+
+
+
 // CORS
-
-app.use((req, res, next)=> {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  
-  next();
-})
-
+app.use(cors)
 // AKHIR CORS
-
-
-const apiKeys = {
-  'ahmadd': { limit: 1000000 }, // Batasan khusus untuk API key 'ahmad'
-  'madzz': { limit: Infinity } // Tidak ada batasan untuk API key kedua
-};
-
-const usageTracker = {}; // Objek untuk melacak penggunaan API key
-
-// Middleware untuk memeriksa API key dan batasan
-const checkApiKey = (req, res, next) => {
-  const providedApiKey = req.query.ApiKey;
-
-  const apiKeyData = apiKeys[providedApiKey];
-
-  if (apiKeyData) {
-    if (!usageTracker[providedApiKey]) {
-      usageTracker[providedApiKey] = 1;
-    } else {
-      usageTracker[providedApiKey]++;
-    }
-
-    if (usageTracker[providedApiKey] > apiKeyData.limit) {
-      res.status(429).json({ error: 'API key usage limit exceeded' });
-    } else {
-      next();
-    }
-  } else {
-    res.status(401).json({ error: 'Invalid API key' });
-  }
-};
 
 // Menyediakan direktori publik
 app.use(express.static('public'));
@@ -60,33 +30,19 @@ app.get("/", (req, res) => {
   res.sendFile(filePath);
 });
 
-app.use(checkApiKey);
-
 // Middleware Logging 
-
-app.use((req, res, next) => {
-  const now = new Date();
-  const hours = now.getHours();
-  const minutes = now.getMinutes();
-  const seconds = now.getSeconds();
-
-  function formatNumber(date) {
-    if (date < 10) {
-      return `0${date}`;
-    } else {
-      return date;
-    }
-  }
-
-  console.log(`terjadi permintaan pada server pada jam ${formatNumber(hours)}:${formatNumber(minutes)}:${formatNumber(seconds)}`);
-
-
-  next();
-})
-
+app.use(Logging)
 //Akhir Middleware
 
+// Middlleware API Key
+app.use(checkApiKey);
+// Middlleware API Key
 
+// Mengizinkan Request Body Berupa JSON
+app.use(express.json())
+// Mengizinkan Request Body Berupa JSON
+
+app.post("/api/kontak",kirimPesan)
 
 app.get("/api/kisahnabi", (req, res) =>{
   const sqlKisahNabi = "SELECT * FROM kisahnabi"
@@ -120,6 +76,8 @@ app.get("/api/kisahnabi/:id", (req, res) => {
     
   });
 });
+
+
 
 app.get("/api/doaharian",(req, res)=>{
   const doasql = "SELECT * FROM doaharian"
