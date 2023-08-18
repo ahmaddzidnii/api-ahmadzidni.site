@@ -1,4 +1,7 @@
 const db = require('../connection')
+const axios = require('axios')
+require('dotenv').config()
+
 
 const kirimPesan = (req, res) => {
     const body = req.body;
@@ -28,7 +31,7 @@ const kirimPesan = (req, res) => {
         });
     }
 
-    const QuerySql = 'INSERT INTO `kontak` (`nama`, `email`, `pesan`) VALUES (?, ?, ?)';
+    const QuerySql = 'INSERT INTO `kontak` (`TimeStamp`,`nama`, `email`, `pesan`) VALUES (NOW(),?, ?, ?)';
 
     db.query(QuerySql, [nama, email, pesan], (err, result) => {
         if (err) {
@@ -36,9 +39,25 @@ const kirimPesan = (req, res) => {
                 message: "data gagal dikirim"
             });
         } else {
+
+            const botToken = process.env.TOKEN_BOT_DATABASE
+            const chatId = process.env.CHATID_BOT_DATABASE
+            const message = `Seseorang Berkomentar dan telah ditambahkan di database anda.\n\nDetail data yang baru telah ditambahkan:\nNama: ${nama}\nEmail: ${email}\nPesan: ${pesan}`;
+
+             // Mengirim pesan menggunakan Axios
+        axios.post(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            chat_id: chatId,
+            text: message,
+        }).then(() => {
             res.status(200).json({
                 message: "data berhasil dikirim"
             });
+        }).catch(error => {
+            console.error(error);
+            res.status(500).json({
+                message: "data berhasil dikirim, tetapi pemberitahuan gagal"
+            });
+        });
         }
     });
 };
