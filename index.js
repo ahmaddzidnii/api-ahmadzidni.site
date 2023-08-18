@@ -1,7 +1,8 @@
 const express = require("express");
 const app = express();
 const port = 3000;
-const db = require("./connection");
+// const db = require("./connection");
+const db = require("./connectionpool");
 const path = require('path')
 const response = require("./response");
 const NotFound = require("./notfound");
