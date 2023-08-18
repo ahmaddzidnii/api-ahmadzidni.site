@@ -6,20 +6,22 @@ const path = require('path')
 const response = require("./response");
 const NotFound = require("./notfound");
 
+const cors = require('cors')
+
 
 
 
 // Middleware
 const Logging = require('./middleware/loging');
 const checkApiKey = require('./middleware/apiKey')
-const cors = require('./middleware/cors')
+// const cors = require('./middleware/cors')
 const kirimPesan = require('./middleware/kirimpesan')
 
 
 
 
 // CORS
-app.use(cors)
+app.use(cors())
 // AKHIR CORS
 
 // Menyediakan direktori publik
