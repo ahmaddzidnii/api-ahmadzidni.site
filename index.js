@@ -17,8 +17,7 @@ const Logging = require('./middleware/loging');
 const checkApiKey = require('./middleware/apiKey')
 // const cors = require('./middleware/cors')
 const kirimPesan = require('./middleware/kirimpesan')
-
-
+const getkomentar = require('./middleware/getKomentar.js')
 
 
 // CORS
@@ -46,6 +45,7 @@ app.use(express.json())
 // Mengizinkan Request Body Berupa JSON
 
 app.post("/api/kontak",kirimPesan)
+app.get("/api/kontak",getkomentar)
 
 app.get("/api/kisahnabi", (req, res) =>{
   const sqlKisahNabi = "SELECT * FROM kisahnabi"
