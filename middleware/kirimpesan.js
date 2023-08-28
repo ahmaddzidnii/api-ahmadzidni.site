@@ -31,9 +31,9 @@ const kirimPesan = (req, res) => {
         });
     }
 
-    const QuerySql = 'INSERT INTO `kontak` (`TimeStamp`,`nama`, `email`, `pesan`) VALUES (NOW(),?, ?, ?)';
-
-    db.query(QuerySql, [nama, email, pesan], (err, result) => {
+    const QuerySql = 'INSERT INTO `kontak` (`Tanggal`, `nama`, `email`, `pesan`) VALUES (?, ?, ?, ?)';
+    const unixEpoch = Date.now();
+    db.query(QuerySql, [unixEpoch, nama, email, pesan], (err, result) => {
         if (err) {
             res.status(500).json({
                 message: "data gagal dikirim"
